@@ -1,0 +1,57 @@
+<!DOCTYPE >
+<html>
+<head>
+    <title>FirstVue</title>
+</head>
+
+<body>
+    <div id="watch-example">
+        <p>
+            Ask a yes/no question:
+            <input v-model="question">
+        </p>
+        <p>{{ answer }}</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
+    <script>
+        var watchExampleVM = new Vue({
+            el: "#watch-example",
+            data: {
+                question: "",
+                answer: "I could not give you an answer until you ask the question."
+            },
+            watch: {
+                question: function (newQuestion, oldQuestion) {
+                    this.answer = "Waiting for you to stop typing..."
+                    this.getAnswer()
+                }
+            },
+            methods: {
+                getAnswer: _.debounce(
+                    function () {
+                        if (this.question.indexOf("?") === -1) {
+                            this.answer = "Question usually contain a question mark."
+                            return
+                        }
+                        this.answer = "Thinking..."
+                        var vm = this
+                        axios.get('https://yesno.wtf/api')
+                            .then(function (response) {
+                                vm.answer = _.capitalize(response.data.answer)
+                            })
+                            .catch(function (error) {
+                                vm.answer = 'Error! Could not reach the API. ' + error
+                            })
+                    },
+                    500
+                )
+            }
+
+        })
+    </script>
+</body>
+
+</html>

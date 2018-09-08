@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+</head>
+
+<body>
+    <div id="dynamic-fade-demo" class="demo">
+        <span> Fade In:</span>
+        <input type="range" v-model="fadeInDuration" min="0" :max="maxFadeDuration">
+        <span> Fade Out:</span>
+        <input type="range" v-model="fadeOutDuration" min="0" :max="maxFadeDuration">
+        <transition :css="false" @before-enter="beforeEnter" @enter="enter" @leave="leave">
+            <p v-if="show">Hello</p>
+        </transition>
+        <!-- 要把东西放在Vue的那个div里面 -->
+        <button v-if="stop" @click="stop = false; show = false;">Start animating</button>
+        <button v-else @click="stop = true;">Stop it!</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.3/velocity.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+    <script>
+        new Vue({
+            el: "#dynamic-fade-demo",
+            data: {
+                show: true,
+                fadeInDuration: 1000,
+                fadeOutDuration: 1000,
+                maxFadeDuration: 1500,
+                stop: false,
+            },
+            mounted: function () {
+                this.show = false;
+            },
+            methods: {
+                beforeEnter: function (el) {
+                    el.style.opacity = 0;
+                },
+                enter: function (el, done) {
+                    var vm = this;
+                    Velocity(el, {
+                        opacity: 1,
+                    }, {
+                        duration: this.fadeInDuration,
+                        complete: function () {
+                            done();
+                            if (!vm.stop)
+                                vm.show = false;
+                        }
+                    });
+                },
+                leave: function (el, done) {
+                    var vm = this;
+                    Velocity(el, {
+                        opacity: 0,
+                    }, {
+                        duration: this.fadeOutDuration,
+                        complete: function () {
+                            done();
+                            vm.show = true;
+                        }
+                    });
+                }
+            },
+        })
+    </script>
+</body>
+
+</html>
